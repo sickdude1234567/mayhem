@@ -23,7 +23,11 @@ while True:
     print("[*] Faking survey visit...")
 
     #extract survey_data
-    page = session.get("https://www.surveymonkey.com/r/7JZRVLJ?embedded=1")
+    try:
+        page = session.get("https://www.surveymonkey.com/r/7JZRVLJ?embedded=1")
+    except requests.RequestException:
+        print("[!] Can't connect to host. Do you have an existing internet connection?")
+        exit()
 
     print("[*] Extracting \"survey_data\" parameter...")
     survey_data_offset = page.text.find("survey_data\" value=\"") + 20
@@ -86,9 +90,15 @@ while True:
     }
 
     print("[*] Submitting survey with word \""+ word + "\"...")
-    response = session.post("https://www.surveymonkey.com/r/7JZRVLJ?embedded=1", headers=headers_2, files=post_data)
-    print("[*] Debug info: Status code: " + str(response.status_code))
+    try:
+        response = session.post("https://www.surveymonkey.com/r/7JZRVLJ?embedded=1", headers=headers_2, files=post_data)
+    except requests.RequestException:
+        print("[!] Can't connect to host. Do you have an existing internet connection?")
+        exit()
+
     
+    print("[*] Debug info: Status code: " + str(response.status_code))
+
     if response.status_code != 200:
         print("[!] Failed to submit survey. Please report this bug.")
         print("[!] Writing http response to debug file...")
