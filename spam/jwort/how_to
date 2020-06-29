@@ -1,5 +1,5 @@
 first download python 3 if you dont have it: https://www.python.org/downloads/ IMPORTANT: check register for filenames or whatever
-then run the script in python (double click should do the job)
+then run the script in python (right click -> open with -> python)
 
 the first time you run it it will install the requests library. that can take a minute
 
