@@ -16,9 +16,6 @@ print("")
 print("[*] Commencing spam...\n\n")
 
 while True:
-    wait = randint(0,5000) / 1000
-    print("[*] Waiting " + str(wait) + "s...\n")
-    sleep(wait)
     #create session
     session = requests.Session()
     
@@ -54,6 +51,10 @@ while True:
         survey_data += page.text[i]
 
     print("[*] Debug info: Status code: " + str(page.status_code) + ", \"survey_data\" parameter length: " + str(len(survey_data)))
+
+    wait = randint(0,5000) / 1000
+    print("[*] Waiting " + str(wait) + "s...")
+    sleep(wait)
     
     post_data = {
 
