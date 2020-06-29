@@ -32,15 +32,15 @@ while True:
         print("[!] Failed to extract survey data. Please report this bug.")
         print("[!] Writing http response to debug file...")
         with open("debug_log.txt","w") as f:
+            f.write(page.request.method+"\n")
             f.write('request headers:\n\n\n')
-            f.write(str(page.request.headers))
-            f.write('\n\nrequest content:\n\n\n')
-            f.write(str(page.request.content))
+            f.write(str(page.request.headers) + "\n\n\n\n")
 
-            f.write('headers:\n\n\n')
-            f.write(str(page.headers))
-            f.write('\n\ncontent:\n\n\n')
-            f.write(str(page.content))
+            f.write(str(page.status_code)+"\n")
+            f.write('response headers:\n\n\n')
+            f.write(str(page.headers) + "\n\n")
+            f.write('\n\nresponse content:\n\n\n')
+            f.write(str(page.content.decode()))
         exit()
 
     #python probably has a built in thing but i dont give a shit
@@ -88,19 +88,21 @@ while True:
     print("[*] Submitting survey with word \""+ word + "\"...")
     response = session.post("https://www.surveymonkey.com/r/7JZRVLJ?embedded=1", headers=headers_2, files=post_data)
     print("[*] Debug info: Status code: " + str(response.status_code))
+    
     if response.status_code != 200:
         print("[!] Failed to submit survey. Please report this bug.")
         print("[!] Writing http response to debug file...")
         with open("debug_log.txt","w") as f:
+            f.write(response.request.method+"\n")
             f.write('request headers:\n\n\n')
-            f.write(str(response.request.headers))
+            f.write(str(response.request.headers)+"\n\n")
             f.write('\n\nrequest content:\n\n\n')
-            f.write(str(response.request.content))
+            f.write(str(response.request.body.decode())+"\n\n\n\n")
 
-
+            f.write(str(response.status_code)+"\n")
             f.write('response headers:\n\n\n')
-            f.write(str(response.headers))
+            f.write(str(response.headers)+"\n\n")
             f.write('\n\nresponse content:\n\n\n')
-            f.write(str(response.content))
+            f.write(str(response.content.decode()))
         exit()
     print("")
