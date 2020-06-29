@@ -1,4 +1,3 @@
-import requests
 from os import system
 from time import sleep
 from random import randint
@@ -10,6 +9,8 @@ word = "Hurensohn"
 print("[*] Attempting to install requests library...")
 
 system("pip install requests")
+
+import requests
 
 print("")
 
