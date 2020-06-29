@@ -1,2 +1,2 @@
 # mayhem
-bru
+scripts that are uncalled for
