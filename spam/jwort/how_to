@@ -1,6 +1,8 @@
-first download python 3 if you dont have it: https://www.python.org/downloads/ IMPORTANT: check register for filenames or whatever
+first download python 3 if you dont have it: https://www.python.org/downloads/
 then run the script in python (right click -> open with -> python)
 
 the first time you run it it will install the requests library. that can take a minute
 
 happy spamming
+
+(mir grad aufgefallen dass das noch nicht mal das richtige voting ist, aber immerhin ist das grundgerüst fürs skript jetzt da und man kann es bestimmt wiederverwenden)
