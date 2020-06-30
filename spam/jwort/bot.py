@@ -6,13 +6,27 @@ word = "Hurensohn"
 
 #install requests
 
-print("[*] Attempting to install requests library...")
+print("[*] Loading requests library... ",end="")
 
-system("pip install requests")
+try:
+    import requests
+    print("Done")
+except:
+    print("Failed")
+    print("[!] Requests library not found.")
+    print("[*] Installing requests library...\n")
+    system("pip install requests")
+    try:
+        import requests
+    except:
+        print("")
+        print("[!] Could not load requests library. Try to install it manually.")
+        exit()
+    
 
-import requests
 
-print("")
+
+print("\n")
 
 print("[*] Commencing spam...\n\n")
 
@@ -64,7 +78,7 @@ while True:
     post_data = {
 
         "463803414": (None, "3067519628"),
-        "463803684": (None,"Hurensohn"),
+        "463803684": (None, word),
         "483089934[]": (None,"3189794655"),
         "survey_data": (None,survey_data),
         'response_quality_data': (None,'{"question_info":{"qid_463803414":{"number":1,"type":"dropdown","option_count":5,"has_other":false,"other_selected":null,"relative_position":[[2,0]],"dimensions":[5,1],"input_method":null,"is_hybrid":false},"qid_463803684":{"number":2,"type":"open_ended","option_count":null,"has_other":false,"other_selected":null,"relative_position":null,"dimensions":null,"input_method":"text_typed","is_hybrid":true},"qid_483089934":{"number":3,"type":"multiple_choice_vertical","option_count":1,"has_other":false,"other_selected":null,"relative_position":[[0,0]],"dimensions":[1,1],"input_method":null,"is_hybrid":false}},"start_time":1593393913312,"end_time":1593393973805,"time_spent":60493,"previous_clicked":false,"has_backtracked":false,"bi_voice":{}}')
