@@ -2,31 +2,54 @@ from os import system
 from time import sleep
 from random import randint
 
+###replace these with save_imports (might add more in the future). These are here so vs code works.
+
+#import requests
+
+
+#im literally gonna copy and paste this into every python project i do
+def save_import(module, **kwargs):
+
+    attribute = kwargs.get("attribute", None)
+    name = kwargs.get("name", None)
+
+
+    if not attribute:
+        print("[*] Loading " + module + " library",end="")
+    else:
+        print("[*] Loading " + attribute + " from " + module + " library",end="")
+    
+    if name:
+        print(" as " + name, end="")
+    print("... ", end="")
+
+    try:
+        
+        if not attribute:
+            import_string = "import " + module
+        else:
+            import_string = "from " + module + " import " + attribute
+        if name:
+            import_string += " as " + name
+        
+        exec(import_string, globals())
+        print("Done")
+    except ModuleNotFoundError:
+        print("Failed")
+        print("[!] " + module + " library not found.")
+        print("[*] Installing " + module + " library...\n")
+        system("pip install " + module)
+        print("")
+        try:
+            exec(import_string, globals())
+        except ModuleNotFoundError:
+            print("[!] Could not load " + module + " library. Try to install it manually.")
+            exit()
+
+save_import("requests")
+
 word = "Hurensohn"
 
-#install requests
-
-print("[*] Loading requests library... ",end="")
-
-try:
-    import requests
-    print("Done")
-except:
-    print("Failed")
-    print("[!] Requests library not found.")
-    print("[*] Installing requests library...\n")
-    system("pip install requests")
-    try:
-        import requests
-    except:
-        print("")
-        print("[!] Could not load requests library. Try to install it manually.")
-        exit()
-    
-
-
-
-print("\n")
 
 print("[*] Commencing spam...\n\n")
 
