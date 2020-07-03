@@ -1,12 +1,3 @@
-from os import system
-from time import sleep
-from random import randint
-
-###replace these with save_imports (might add more in the future). These are here so vs code works.
-
-#import requests
-
-
 #im literally gonna copy and paste this into every python project i do
 def save_import(module, **kwargs):
 
@@ -46,9 +37,51 @@ def save_import(module, **kwargs):
             print("[!] Could not load " + module + " library. Try to install it manually.")
             exit()
 
+
+
+
+
+import string
+
+from os import system
+from time import sleep
+from random import randint
+
+###replace these with save_imports (might add more in the future). These are here so vs code works.
+
+#import requests
+
 save_import("requests")
 
-word = "Hurensohn"
+default_word = "Hurensohn"
+
+def get_word():
+    print("[*] Enter word to submit (or press enter to use \"Hurensohn\"):")
+
+    word = input("[*] word >> ")
+    if word == "":
+        return default_word
+
+    for c in word:
+        if c not in string.ascii_letters and c not in string.digits:
+            print("[!] The word you entered contains characters that aren't letters or numbers.")
+            print("[!] Do you want to change it (y/n)?")
+            while True:
+                response = input("[!] (y/n) >> ")
+
+                if response.lower() == "y":
+                    word = get_word()
+                    break
+                elif response.lower() == "n":
+                    break
+                else:
+                    print("[!] Not a valid answer.")
+            break
+    return word
+
+print("")
+
+word = get_word()
 
 
 print("[*] Commencing spam...\n\n")
