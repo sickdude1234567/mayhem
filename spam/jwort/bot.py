@@ -29,7 +29,8 @@ def save_import(module, **kwargs):
         print("Failed")
         print("[!] " + module + " library not found.")
         print("[*] Installing " + module + " library...\n")
-        system("pip install " + module)
+        version = sys_version[:sys_version.find(".", sys_version.find(".") + 1)]
+        system("py -" + version + " -m pip install " + module)
         print("")
         try:
             exec(import_string, globals())
@@ -43,6 +44,7 @@ def save_import(module, **kwargs):
 
 import string
 
+from sys import version as sys_version
 from os import system
 from time import sleep
 from random import randint
