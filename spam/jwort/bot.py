@@ -55,7 +55,7 @@ from random import randint
 
 save_import("requests")
 
-default_word = "Hurensohn"
+default_word = "Schabernack"
 
 def get_word():
     print("[*] Enter word to submit (or press enter to use \"Hurensohn\"):")
@@ -85,6 +85,7 @@ print("")
 
 word = get_word()
 
+count = 0
 
 print("[*] Commencing spam...\n\n")
 
@@ -164,6 +165,7 @@ while True:
     print("[*] Submitting survey with word \""+ word + "\"...")
     try:
         response = session.post("https://www.surveymonkey.com/r/7JZRVLJ?embedded=1", headers=headers_2, files=post_data)
+        count += 1
     except requests.RequestException:
         print("[!] Can't connect to host. Do you have an existing internet connection?")
         exit()
@@ -187,4 +189,5 @@ while True:
             f.write('\n\nresponse content:\n\n\n')
             f.write(str(response.content.decode()))
         exit()
+    print("[*] Sumbitted survey " + str(count) + " time" + int(count -1 > 0) * "s" + " so far.")
     print("")
