@@ -58,7 +58,7 @@ save_import("requests")
 default_word = "Schabernack"
 
 def get_word():
-    print("[*] Enter word to submit (or press enter to use \"Hurensohn\"):")
+    print("[*] Enter word to submit (or press enter to use \"" + default_word + "\"):")
 
     word = input("[*] word >> ")
     if word == "":
