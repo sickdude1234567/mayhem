@@ -60,6 +60,7 @@ save_import("keyboard")
 
 DEFAULT_WORD = "Schabernack"
 DEFAULT_THREADS = 5
+DEFAULT_WAIT = True
 
 #Capping this out here, im not sure what would happen if you change it.
 MAX_THREADS = 100
@@ -70,6 +71,8 @@ word = ""
 threads = 0
 count = 0
 focused_thread = 0
+
+wait = True
 
 
 #stolen from the interwebZ
@@ -123,6 +126,20 @@ def get_threads():
         except:
             print("[!] Invalid input. Did you enter a number?")
             continue
+
+def get_wait():
+    print("[*] Should the script wait a little between each request (enter = yes)?")
+    while True:
+        answ = input("[*] (y/n) >> ")
+        if answ == "":
+            return DEFAULT_WAIT
+        if answ.lower() == "y":
+            return True
+        elif answ.lower() == "n":
+            return False
+        else:
+            print("[!] Not a valid answer.")
+
 
 #print thread id plus text if thread id is focused. If no text, print empty line. Then print menu instructions.
 def running_print(thread_id, text, **kwargs):
@@ -181,10 +198,10 @@ def spam(thread_id):
             survey_data += page.text[i]
 
         running_print(thread_id, "[*] Debug info: Status code: " + str(page.status_code) + ", \"survey_data\" parameter length: " + str(len(survey_data)))
-
-        wait = randint(0,5000) / 1000
-        running_print(thread_id, "[*] Waiting " + str(wait) + "s...")
-        sleep(wait)
+        if wait:
+            wait_time = randint(0,5000) / 1000
+            running_print(thread_id, "[*] Waiting " + str(wait_time) + "s...")
+            sleep(wait_time)
         
         post_data = {
 
@@ -246,6 +263,7 @@ def spam(thread_id):
 
 word = get_word()
 threads = get_threads()
+wait = get_wait()
 
 
 
