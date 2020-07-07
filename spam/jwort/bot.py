@@ -65,12 +65,16 @@ DEFAULT_WAIT = True
 #Capping this out here, im not sure what would happen if you change it.
 MAX_THREADS = 100
 
+NO_INTERNET_TIMEOUT = 30 #seconds
+
 print("")
 
 word = ""
 threads = 0
 count = 0
 focused_thread = 0
+
+
 
 wait = True
 
@@ -85,30 +89,38 @@ def flush_input():
         import sys, termios
         termios.tcflush(sys.stdin, termios.TCIOFLUSH)
 
+def string_is_ascii_or_letter_only(istring):
+    for c in istring:
+        if c not in string.ascii_letters and c not in string.digits:
+            return False
+    return True
 
+#recursion go
 def get_word():
     print("[*] Enter word to submit (or press enter to use \"" + DEFAULT_WORD + "\"):")
+    while True:
+        word = input("[*] word >> ")
+        if word == "":
+            return DEFAULT_WORD
 
-    word = input("[*] word >> ")
-    if word == "":
-        return DEFAULT_WORD
-
-    for c in word:
-        if c not in string.ascii_letters and c not in string.digits:
+        if not string_is_ascii_or_letter_only(word):
             print("[!] The word you entered contains characters that aren't letters or numbers.")
             print("[!] Do you want to change it (y/n)?")
+            retry = False
             while True:
                 response = input("[!] (y/n) >> ")
 
                 if response.lower() == "y":
-                    word = get_word()
+                    retry = True
                     break
                 elif response.lower() == "n":
                     break
                 else:
                     print("[!] Not a valid answer.")
-            break
-    return word
+            if retry:
+                retry = False
+                continue
+        return word
 
 def get_threads():
     print("[*] How many threads (simultaneous processes) do you want to run?")
@@ -158,6 +170,8 @@ def running_print(thread_id, text, **kwargs):
 def spam(thread_id):
     global count
 
+    # wait for all threads to launch (aesthetic purposes)
+    sleep(1)
     while True:
         #create session
         session = requests.Session()
@@ -169,7 +183,8 @@ def spam(thread_id):
             page = session.get("https://www.surveymonkey.com/r/7JZRVLJ?embedded=1")
         except requests.RequestException:
             running_print(thread_id, "[!] Can't connect to host. Do you have an existing internet connection?")
-            exit()
+            sleep(NO_INTERNET_TIMEOUT)
+            continue
 
         running_print(thread_id, "[*] Extracting \"survey_data\" parameter...")
         survey_data_offset = page.text.find("survey_data\" value=\"") + 20
@@ -237,7 +252,8 @@ def spam(thread_id):
             count += 1
         except requests.RequestException:
             running_print(thread_id, "[!] Can't connect to host. Do you have an existing internet connection?")
-            exit()
+            sleep(NO_INTERNET_TIMEOUT)
+            continue
 
         
         running_print(thread_id, "[*] Debug info: Status code: " + str(response.status_code))
@@ -267,13 +283,16 @@ wait = get_wait()
 
 
 
-print("[*] Commencing spam...\n\n")
+print("[*] Commencing spam...")
 print("[*] TIP: You can switch the focused thread by pressing s or t.")
+print("\n")
 #launch all threads
 
 for i in range(threads):
     print("[*] Launching thread " + str(i+1) + " ...")
     start_new_thread(spam, (i,))
+
+print("")
 
 while True:
 
