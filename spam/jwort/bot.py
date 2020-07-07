@@ -66,6 +66,7 @@ DEFAULT_WAIT = True
 MAX_THREADS = 100
 
 NO_INTERNET_TIMEOUT = 30 #seconds
+ERROR_TIMEOUT = 60 #website may be down, dont aritificially increase traffic
 
 print("")
 
@@ -75,7 +76,7 @@ count = 0
 focused_thread = 0
 
 
-
+error = False
 wait = True
 
 
@@ -169,10 +170,17 @@ def running_print(thread_id, text, **kwargs):
 
 def spam(thread_id):
     global count
+    global focused_thread
+    global error
 
     # wait for all threads to launch (aesthetic purposes)
     sleep(1)
     while True:
+        
+        #wait if error
+        if error:
+            sleep(ERROR_TIMEOUT)
+
         #create session
         session = requests.Session()
         
@@ -190,19 +198,25 @@ def spam(thread_id):
         survey_data_offset = page.text.find("survey_data\" value=\"") + 20
 
         if survey_data_offset == 19:
-            running_print(thread_id, "[!] Failed to extract survey data. Please report this bug.")
-            running_print(thread_id, "[!] Writing http response to debug file...")
-            with open("debug_log.txt","w") as f:
-                f.write(page.request.method+"\n")
-                f.write('request headers:\n\n\n')
-                f.write(str(page.request.headers) + "\n\n\n\n")
+            if not error:
+                error = True
+                focused_thread = thread_id
+                running_print(thread_id, "[!] Failed to extract survey data. Please report this bug.")
+                running_print(thread_id, "[!] Writing http response to debug file...")
+                with open("debug_log.txt","a") as f:
+                    
+                    f.write("\n\n\n\n\n")
+                    f.write(page.request.method+"\n")
+                    f.write('request headers:\n\n\n')
+                    f.write(str(page.request.headers) + "\n\n\n\n")
 
-                f.write(str(page.status_code)+"\n")
-                f.write('response headers:\n\n\n')
-                f.write(str(page.headers) + "\n\n")
-                f.write('\n\nresponse content:\n\n\n')
-                f.write(str(page.content.decode()))
-            exit()
+                    f.write(str(page.status_code)+"\n")
+                    f.write('response headers:\n\n\n')
+                    f.write(str(page.headers) + "\n\n")
+                    f.write('\n\nresponse content:\n\n\n')
+                    f.write(str(page.content.decode('latin-1')))
+            continue
+        
 
         #python probably has a built in thing but i dont give a shit
         survey_data = ""
@@ -259,21 +273,26 @@ def spam(thread_id):
         running_print(thread_id, "[*] Debug info: Status code: " + str(response.status_code))
 
         if response.status_code != 200:
-            running_print(thread_id, "[!] Failed to submit survey. Please report this bug.")
-            running_print(thread_id, "[!] Writing http response to debug file...")
-            with open("debug_log.txt","w") as f:
-                f.write(response.request.method+"\n")
-                f.write('request headers:\n\n\n')
-                f.write(str(response.request.headers)+"\n\n")
-                f.write('\n\nrequest content:\n\n\n')
-                f.write(str(response.request.body.decode())+"\n\n\n\n")
+            if not error:
+                error = True
+                focused_thread = thread_id
+                running_print(thread_id, "[!] Failed to submit survey. Please report this bug.")
+                running_print(thread_id, "[!] Writing http response to debug file...")
+                with open("debug_log.txt","a") as f:
+                    f.write("\n\n\n\n\n")
+                    f.write(response.request.method+"\n")
+                    f.write('request headers:\n\n\n')
+                    f.write(str(response.request.headers)+"\n\n")
+                    f.write('\n\nrequest content:\n\n\n')
+                    f.write(str(response.request.body.decode('latin-1'))+"\n\n\n\n")
 
-                f.write(str(response.status_code)+"\n")
-                f.write('response headers:\n\n\n')
-                f.write(str(response.headers)+"\n\n")
-                f.write('\n\nresponse content:\n\n\n')
-                f.write(str(response.content.decode()))
-            exit()
+                    f.write(str(response.status_code)+"\n")
+                    f.write('response headers:\n\n\n')
+                    f.write(str(response.headers)+"\n\n")
+                    f.write('\n\nresponse content:\n\n\n')
+                    f.write(str(response.content.decode('latin-1')))
+            continue
+        error = False
         running_print(thread_id, "[*] Sumbitted survey " + str(count) + " time" + int(count -1 > 0) * "s" + " so far.")
         running_print(thread_id, "")
 
