@@ -1,5 +1,8 @@
 #im literally gonna copy and paste this into every python project i do
 def save_import(module, **kwargs):
+    from sys import version as sys_version
+    from os import system
+
 
     attribute = kwargs.get("attribute", None)
     name = kwargs.get("name", None)
@@ -40,12 +43,15 @@ def save_import(module, **kwargs):
 
 
 
+#FORMAT: script_name  word  threads  wait (True/False)
 
 
-import string
+#youre not supposed to call this with args, it will work, but they are here to 
+#preserve vars after restart.
 
-from sys import version as sys_version
-from os import system
+import sys, os, string
+
+from subprocess import Popen, CREATE_NEW_CONSOLE
 from time import sleep
 from random import randint
 from _thread import start_new_thread
@@ -58,6 +64,8 @@ from _thread import start_new_thread
 save_import("requests")
 save_import("keyboard")
 
+VERSION = "0.4.2"
+
 DEFAULT_WORD = "Schabernack"
 DEFAULT_THREADS = 5
 DEFAULT_WAIT = True
@@ -68,6 +76,8 @@ MAX_THREADS = 100
 NO_INTERNET_TIMEOUT = 30 #seconds
 ERROR_TIMEOUT = 60 #website may be down, dont aritificially increase traffic
 
+API_BASE = "https://jwortcounter.000webhostapp.com"
+
 print("")
 
 word = ""
@@ -75,6 +85,7 @@ threads = 0
 count = 0
 focused_thread = 0
 
+update = False
 
 error = False
 wait = True
@@ -155,14 +166,14 @@ def get_wait():
 
 
 #print thread id plus text if thread id is focused. If no text, print empty line. Then print menu instructions.
-def running_print(thread_id, text, **kwargs):
+def thread_print(thread_id, text, **kwargs):
     if not thread_id == focused_thread:
         return
     if text == "":
             print("")
     else:
 
-        text = str(thread_id + 1) + "|: " + text
+        text = str(thread_id + 1) + "|: " + str(text)
         if kwargs.get("end", None):
             print(text,end=kwargs.get("end", None))
         else:
@@ -173,9 +184,14 @@ def spam(thread_id):
     global focused_thread
     global error
 
+    local_count = 0
+
     # wait for all threads to launch (aesthetic purposes)
     sleep(1)
     while True:
+
+        if update:
+            exit()
         
         #wait if error
         if error:
@@ -184,25 +200,25 @@ def spam(thread_id):
         #create session
         session = requests.Session()
         
-        running_print(thread_id, "[*] Faking survey visit...")
+        thread_print(thread_id, "[*] Faking survey visit...")
 
         #extract survey_data
         try:
             page = session.get("https://www.surveymonkey.com/r/7JZRVLJ?embedded=1")
         except requests.RequestException:
-            running_print(thread_id, "[!] Can't connect to host. Do you have an existing internet connection?")
+            thread_print(thread_id, "[!] Can't connect to host. Do you have an existing internet connection?")
             sleep(NO_INTERNET_TIMEOUT)
             continue
 
-        running_print(thread_id, "[*] Extracting \"survey_data\" parameter...")
+        thread_print(thread_id, "[*] Extracting \"survey_data\" parameter...")
         survey_data_offset = page.text.find("survey_data\" value=\"") + 20
 
         if survey_data_offset == 19:
             if not error:
                 error = True
                 focused_thread = thread_id
-                running_print(thread_id, "[!] Failed to extract survey data. Please report this bug.")
-                running_print(thread_id, "[!] Writing http response to debug file...")
+                thread_print(thread_id, "[!] Failed to extract survey data. Please report this bug.")
+                thread_print(thread_id, "[!] Writing http response to debug file...")
                 with open("debug_log.txt","a") as f:
                     
                     f.write("\n\n\n\n\n")
@@ -226,10 +242,10 @@ def spam(thread_id):
                 break
             survey_data += page.text[i]
 
-        running_print(thread_id, "[*] Debug info: Status code: " + str(page.status_code) + ", \"survey_data\" parameter length: " + str(len(survey_data)))
+        thread_print(thread_id, "[*] Debug info: Status code: " + str(page.status_code) + ", \"survey_data\" parameter length: " + str(len(survey_data)))
         if wait:
             wait_time = randint(0,5000) / 1000
-            running_print(thread_id, "[*] Waiting " + str(wait_time) + "s...")
+            thread_print(thread_id, "[*] Waiting " + str(wait_time) + "s...")
             sleep(wait_time)
         
         post_data = {
@@ -260,24 +276,24 @@ def spam(thread_id):
 
         }
 
-        running_print(thread_id, "[*] Submitting survey with word \""+ word + "\"...")
+        thread_print(thread_id, "[*] Submitting survey with word \""+ word + "\"...")
         try:
             response = session.post("https://www.surveymonkey.com/r/7JZRVLJ?embedded=1", headers=headers_2, files=post_data)
             count += 1
         except requests.RequestException:
-            running_print(thread_id, "[!] Can't connect to host. Do you have an existing internet connection?")
+            thread_print(thread_id, "[!] Can't connect to host. Do you have an existing internet connection?")
             sleep(NO_INTERNET_TIMEOUT)
             continue
 
         
-        running_print(thread_id, "[*] Debug info: Status code: " + str(response.status_code))
+        thread_print(thread_id, "[*] Debug info: Status code: " + str(response.status_code))
 
         if response.status_code != 200:
             if not error:
                 error = True
                 focused_thread = thread_id
-                running_print(thread_id, "[!] Failed to submit survey. Please report this bug.")
-                running_print(thread_id, "[!] Writing http response to debug file...")
+                thread_print(thread_id, "[!] Failed to submit survey. Please report this bug.")
+                thread_print(thread_id, "[!] Writing http response to debug file...")
                 with open("debug_log.txt","a") as f:
                     f.write("\n\n\n\n\n")
                     f.write(response.request.method+"\n")
@@ -293,14 +309,109 @@ def spam(thread_id):
                     f.write(str(response.content.decode('latin-1')))
             continue
         error = False
-        running_print(thread_id, "[*] Sumbitted survey " + str(count) + " time" + int(count -1 > 0) * "s" + " so far.")
-        running_print(thread_id, "")
-
-word = get_word()
-threads = get_threads()
-wait = get_wait()
+        thread_print(thread_id, "[*] Sumbitted survey " + str(count) + " time" + int(count -1 > 0) * "s" + " so far.")
+        
+        local_count += 1
 
 
+        if local_count % 10 == thread_id % 10:
+            # api time
+            api_response = requests.post(API_BASE + "/counter/", data="{\"count\":10}")
+            if not api_response.status_code == 200:
+                thread_print(thread_id, "[!] The bot's Web-API refuses service")
+            else:
+                thread_print(thread_id, "[*] Together, we submitted the survey a total of " + api_response.content.decode() + " times.")
+        
+        thread_print(thread_id, "")
+
+def update_thread():
+
+    global focused_thread
+
+    while True:
+        sleep(30)
+        update_link = check_for_update()
+        if update_link:
+            
+            focused_thread_buf = focused_thread
+            focused_thread = -1
+
+            print("\n\n")
+            print("[*] Update available (bot is still running).")
+            print("[*] Update now?")
+            if ask_y_n():
+                do_update(update_link)
+            
+            print("\n\n")
+            focused_thread = focused_thread_buf
+                
+
+
+def check_for_update():
+    try:
+        api_response = requests.get(API_BASE + "/update/?v=" + VERSION)
+    except:
+        print("[!] The bot's Web-API doesn't respond to /update/ - queries.")
+    if api_response.status_code == 200:
+        return api_response.content.decode()
+    else:
+        return False
+
+def do_update(update_link):
+    global update
+    print("[*] Downloading update...")
+    try:
+        api_response = requests.get(update_link)
+    except:
+        print("[!] Couldn't download update.")
+        return
+    
+    if api_response.status_code != 200:
+        print("[!] Couldn't download update.")
+        return
+
+    update = True
+    print("Installing update...")
+
+    with open(os.path.realpath(__file__), "wb")  as script_file:
+        script_file.write(api_response.content)
+    
+    Popen([sys.executable, sys.argv[0], word, str(threads), str(wait)], creationflags=CREATE_NEW_CONSOLE)
+    exit()
+    
+
+
+def ask_y_n(**kwargs):
+    default = kwargs.get("default", None)
+
+    while True:
+        answ = input("[*] (y/n) >> ")
+        if answ.lower() == "y":
+            return True
+        elif answ.lower() == "n":
+            return False
+        elif answ == "" and default:
+            return default
+        else:
+            print("[!] Not a valid answer.")
+
+
+if len(sys.argv) == 4:
+    word = sys.argv[1]
+    threads = int(sys.argv[2])
+    wait = bool(sys.argv[3])
+else:
+    word = get_word()
+    threads = get_threads()
+    wait = get_wait()
+
+print("[*] Checking for updates...")
+update_link = check_for_update()
+
+if update_link:
+    do_update(update_link)
+
+print("")
 
 print("[*] Commencing spam...")
 print("[*] TIP: You can switch the focused thread by pressing s or t.")
@@ -310,6 +421,9 @@ print("\n")
 for i in range(threads):
     print("[*] Launching thread " + str(i+1) + " ...")
     start_new_thread(spam, (i,))
+
+#launch update listener
+start_new_thread(update_thread, ())
 
 print("")
 
