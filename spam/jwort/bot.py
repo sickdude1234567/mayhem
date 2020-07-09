@@ -64,7 +64,7 @@ from _thread import start_new_thread
 save_import("requests")
 save_import("keyboard")
 
-VERSION = "0.4.2"
+VERSION = "0.4.3"
 
 DEFAULT_WORD = "Schabernack"
 DEFAULT_THREADS = 5
@@ -86,6 +86,7 @@ count = 0
 focused_thread = 0
 
 update = False
+
 
 error = False
 wait = True
@@ -319,8 +320,6 @@ def spam(thread_id):
             api_response = requests.post(API_BASE + "/counter/", data="{\"count\":10}")
             if not api_response.status_code == 200:
                 thread_print(thread_id, "[!] The bot's Web-API refuses service")
-            else:
-                thread_print(thread_id, "[*] Together, we submitted the survey a total of " + api_response.content.decode() + " times.")
         
         thread_print(thread_id, "")
 
@@ -371,7 +370,7 @@ def do_update(update_link):
         return
 
     update = True
-    print("Installing update...")
+    print("[*] Installing update...")
 
     with open(os.path.realpath(__file__), "wb")  as script_file:
         script_file.write(api_response.content)
@@ -399,7 +398,7 @@ def ask_y_n(**kwargs):
 if len(sys.argv) == 4:
     word = sys.argv[1]
     threads = int(sys.argv[2])
-    wait = bool(sys.argv[3])
+    wait = sys.argv[3] == "True"
 else:
     word = get_word()
     threads = get_threads()
@@ -428,6 +427,9 @@ start_new_thread(update_thread, ())
 print("")
 
 while True:
+
+    if update:
+        exit()
 
     try:
         if keyboard.is_pressed('s') or keyboard.is_pressed('t'):
