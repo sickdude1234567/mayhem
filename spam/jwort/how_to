@@ -1,3 +1,5 @@
+WINDOWS ONLY
+
 first download python 3 if you dont have it: https://www.python.org/downloads/  (Do a full installation, we need pip ALSO CHECK ADD PYTHON TO PATH)
 then run the script in python (right click -> open with -> python (3.8 if there are multiple versions, but should work with any version 3.x))
 
