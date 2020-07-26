@@ -52,6 +52,7 @@ def save_import(module, **kwargs):
 import sys, os, string
 
 from subprocess import Popen, CREATE_NEW_CONSOLE
+from msvcrt import getch
 from time import sleep
 from random import randint
 from _thread import start_new_thread
@@ -59,12 +60,10 @@ from _thread import start_new_thread
 ###replace these with save_imports (might add more in the future). These are here so vs code works.
 
 #import requests
-#import keyboard
 
 save_import("requests")
-save_import("keyboard")
 
-VERSION = "0.4.3"
+VERSION = "0.4.4"
 
 DEFAULT_WORD = "Schabernack"
 DEFAULT_THREADS = 5
@@ -414,6 +413,7 @@ print("")
 
 print("[*] Commencing spam...")
 print("[*] TIP: You can switch the focused thread by pressing s or t.")
+print("[*] Press e to exit.")
 print("\n")
 #launch all threads
 
@@ -431,26 +431,26 @@ while True:
     if update:
         exit()
 
-    try:
-        if keyboard.is_pressed('s') or keyboard.is_pressed('t'):
-            focused_thread = -1
-            sleep(0.5)
-            flush_input()
-            print("\n\n")
-            print("[*] Which thread do you want to focus on?")
-            while True:
-                thread = input("[*] thread (1-" + str(threads) + ") >> ")
-                try:
-                    thread = int(thread)
-                    if thread < 1 or thread > threads:
-                        print("[!] Value not in the allowed range of 1-" + str(threads) + ".")
-                        continue
-                    focused_thread = thread - 1
-                    break
-                except:
-                    print("[!] Invalid input. Did you enter a number?")
+    key = getch().decode()
+
+    if key == "s" or key == "t":
+        focused_thread = -1
+        sleep(0.5)
+        flush_input()
+        print("\n\n")
+        print("[*] Which thread do you want to focus on?")
+        while True:
+            thread = input("[*] thread (1-" + str(threads) + ") >> ")
+            try:
+                thread = int(thread)
+                if thread < 1 or thread > threads:
+                    print("[!] Value not in the allowed range of 1-" + str(threads) + ".")
                     continue
-            print("\n\n")
-    except:
-        pass
-    sleep(0.05)
+                focused_thread = thread - 1
+                break
+            except:
+                print("[!] Invalid input. Did you enter a number?")
+                continue
+        print("\n\n")
+    elif key == "e":
+        exit()
